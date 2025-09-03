@@ -1,56 +1,969 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terno Vermelho</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terno Vermelho - Correção do Bot</title>
+    <style>
+        /* --- CONFIGURAÇÃO GERAL DE TELA CHEIA --- */
+        :root {
+            --altura-carta-mao: 20vh;
+            --largura-carta-mao: calc(var(--altura-carta-mao) * 0.7);
+            --cor-fundo: #0f4d1d;
+            --cor-destaque: #ffdf00;
+            --cor-vermelha: #d10a0a;
+            --cor-verde-botao: #4CAF50;
+            --cor-vermelha-botao: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cor-fundo);
+            color: white;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 5px;
+        }
+
+        /* --- ÁREAS PRINCIPAIS --- */
+        #area-oponente {
+            flex-shrink: 0;
+            padding-bottom: 5px;
+        }
+
+        #area-da-mesa {
+            flex-grow: 1;
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+
+        #area-do-jogador {
+            flex-shrink: 0;
+        }
+
+        /* --- COMPONENTES DO JOGO --- */
+        .info-jogador {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0,0,0,0.4);
+            padding: 8px 15px;
+            border-radius: 10px;
+            margin: 0 auto 5px auto;
+            width: fit-content;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .mao {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        #mao-oponente {
+            height: calc(var(--altura-carta-mao) * 0.5);
+        }
+
+        #mao-jogador {
+            height: var(--altura-carta-mao);
+            padding-bottom: 5px;
+        }
+
+        .carta {
+            height: var(--altura-carta-mao);
+            width: var(--largura-carta-mao);
+            border: 2px solid black;
+            background-color: white;
+            color: black;
+            border-radius: 8px;
+            font-size: 2.8vh;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #mao-jogador .carta {
+            margin-right: calc(var(--largura-carta-mao) * -0.65);
+        }
+        
+        #mao-jogador .carta:hover {
+            transform: translateY(-25px);
+            z-index: 100;
+        }
+        
+        #mao-jogador .carta.selecionada {
+            transform: translateY(-30px);
+            border-color: var(--cor-destaque);
+            box-shadow: 0 0 15px 5px var(--cor-destaque);
+        }
+
+        #mao-oponente .carta {
+            height: 100%;
+            width: calc(100% * 0.7);
+            margin-right: -4vw;
+        }
+
+        #pilar-central {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            min-width: calc(var(--largura-carta-mao) * 0.7 + 20px);
+        }
+        
+        #pilar-central .carta {
+            height: calc(var(--altura-carta-mao) * 0.7);
+            width: calc(var(--largura-carta-mao) * 0.7);
+            font-size: 2vh;
+        }
+
+        #monte-compra-contador {
+            background-color: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .container-jogos-baixados {
+            flex-grow: 1;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 8px;
+            width: 38%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .container-jogos-baixados .jogo {
+            margin-bottom: 5px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .container-jogos-baixados .carta {
+            height: calc(var(--altura-carta-mao) * 0.45);
+            width: calc(var(--largura-carta-mao) * 0.45);
+            font-size: 1.5vh;
+            border-width: 1px;
+            margin-right: -12px;
+        }
+
+        .canastra-info {
+            font-weight: bold; 
+            font-size: 14px; 
+            text-align: center; 
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 3px;
+            border-radius: 4px;
+        }
+        
+        .canastra-limpa { 
+            background-color: rgba(255, 223, 0, 0.2);
+            border: 2px solid var(--cor-destaque);
+        }
+        
+        .canastra-suja { 
+            background-color: rgba(192, 192, 192, 0.2);
+            border: 2px solid #c0c0c0; 
+        }
+
+        #tres-vermelhos-container {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #tres-vermelhos-container h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+        
+        #tres-vermelhos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            min-height: calc(var(--altura-carta-mao) * 0.45);
+        }
+        
+        #tres-vermelhos .carta {
+            height: calc(var(--altura-carta-mao) * 0.4);
+            width: calc(var(--largura-carta-mao) * 0.4);
+            font-size: 1.4vh;
+        }
+
+        .carta.verso { 
+            background-color: #55a; 
+            background-image: linear-gradient(45deg, #0003, #0000); 
+            color: transparent; 
+        }
+        
+        .carta.vermelha { 
+            color: var(--cor-vermelha); 
+        }
+        
+        .carta.travado {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 15px 5px #ff0000;
+        }
+
+        #acoes-container {
+            padding: 10px 0;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        #btn-baixar-jogo, #btn-descartar, #btn-bater { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        
+        #btn-baixar-jogo { 
+            background-color: var(--cor-verde-botao); 
+        }
+        
+        #btn-descartar { 
+            background-color: var(--cor-vermelha-botao); 
+        }
+        
+        #btn-bater {
+            background-color: #2196F3;
+        }
+        
+        #btn-baixar-jogo:hover, #btn-descartar:hover, #btn-bater:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .acao-ativa { 
+            animation: pulsarVerde 1.5s infinite; 
+        }
+        
+        @keyframes pulsarVerde { 
+            50% { 
+                box-shadow: 0 0 25px 12px rgba(120, 255, 120, 0.8); 
+            }
+        }
+        
+        .carta-animada { 
+            animation: piscarComLuz 0.5s 3; 
+        }
+        
+        @keyframes piscarComLuz { 
+            50% { 
+                opacity: 0.8; 
+                box-shadow: 0 0 15px 7px rgba(255, 255, 100, 0.8); 
+            } 
+        }
+        
+        .carta-comprada { 
+            border-color: #64b4ff; 
+            box-shadow: 0 0 15px 7px rgba(100, 180, 255, 0.7); 
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            :root {
+                --altura-carta-mao: 16vh;
+            }
+            
+            #area-da-mesa {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .container-jogos-baixados {
+                width: 100%;
+                max-height: 20vh;
+            }
+            
+            .info-jogador {
+                font-size: 14px;
+                padding: 5px 10px;
+            }
+            
+            #acoes-container {
+                flex-wrap: wrap;
+                height: auto;
+                gap: 8px;
+            }
+            
+            #btn-baixar-jogo, #btn-descartar, #btn-bater {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --altura-carta-mao: 14vh;
+            }
+            
+            #pilar-central {
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+            }
+            
+            .info-jogador {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    
-    <!-- Oponente -->
-    <div class="opponent">
-      <h2>Oponente</h2>
-      <div class="hand opponent-hand">
-        <!-- Cartas do oponente (costas viradas) -->
-        <div class="card back"></div>
-        <div class="card back"></div>
-        <div class="card back"></div>
-        <div class="card back"></div>
-        <div class="card back"></div>
-      </div>
+    <div id="game-container">
+        <!-- Área do Oponente -->
+        <div id="area-oponente">
+            <div class="info-jogador">
+                <span>Oponente: <span id="placar-oponente">0 Pts</span></span>
+                <span>Cartas: <span id="contador-cartas-oponente">15</span></span>
+            </div>
+            <div id="mao-oponente" class="mao"></div>
+        </div>
+        
+        <!-- Área da Mesa -->
+        <div id="area-da-mesa">
+            <!-- Jogos Baixados do Oponente -->
+            <div id="jogos-oponente-container" class="container-jogos-baixados"></div>
+            
+            <!-- Área Central -->
+            <div id="pilar-central">
+                <div id="monte-compra" class="carta verso"></div>
+                <div id="lixo" class="carta"></div>
+                <div id="monte-compra-contador">0 cartas</div>
+                
+                <div id="tres-vermelhos-container">
+                    <h3>3 Vermelhos</h3>
+                    <div id="tres-vermelhos"></div>
+                </div>
+            </div>
+            
+            <!-- Jogos Baixados do Jogador -->
+            <div id="jogos-jogador-container" class="container-jogos-baixados"></div>
+        </div>
+        
+        <!-- Área do Jogador -->
+        <div id="area-do-jogador">
+            <div class="info-jogador">
+                <span>Você: <span id="placar-jogador">0 Pts</span></span>
+                <span>Cartas: <span id="contador-cartas-jogador">15</span></span>
+            </div>
+            <div id="mao-jogador" class="mao"></div>
+            
+            <div id="acoes-container">
+                <button id="btn-baixar-jogo">Baixar Jogo</button>
+                <button id="btn-descartar">Descartar</button>
+                <button id="btn-bater">Bater</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Mesa -->
-    <div class="table">
-      <div class="pile">
-        <h3>Monte</h3>
-        <div class="card back"></div>
-      </div>
-      <div class="discard">
-        <h3>Lixo</h3>
-        <div class="card">7♠</div>
-      </div>
-    </div>
+    <script>
+        // --- Jogo de Canastra - Terno Vermelho ---
 
-    <!-- Jogador -->
-    <div class="player">
-      <h2>Você</h2>
-      <div class="hand player-hand">
-        <div class="card">A♠</div>
-        <div class="card">10♥</div>
-        <div class="card">3♦</div>
-        <div class="card">Q♣</div>
-        <div class="card">K♥</div>
-      </div>
-      <div class="actions">
-        <button>Comprar do Monte</button>
-        <button>Comprar do Lixo</button>
-        <button>Descartar</button>
-      </div>
-    </div>
+        // 1. Definições e Variáveis Globais
+        const naipes = ['♠️', '♣️', '♥️', '♦️'];
+        const valores = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const valoresCartas = { 'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13 };
+        const pontosPorCarta = { 'A': 20, 'K': 10, 'Q': 10, 'J': 10, '10': 10, '9': 10, '8': 10, '7': 5, '6': 5, '5': 5, '4': 5, '3': 5, '2': 10 };
+        const ordemNaipes = { '♣️': 1, '♦️': 2, '♥️': 3, '♠️': 4 }; // Ordem para desempate
 
-  </div>
+        let idUnicoCarta = 0;
+        let jogadores = [[], []]; // 0 = Humano, 1 = Máquina
+        let monteCompra = [];
+        let lixo = [];
+        let jogosBaixados = [];
+        let tresVermelhosBaixados = [];
+        let cartasSelecionadas = [];
+        let jogadorAtual = 0;
+        let podeComprar = true;
+        let idCartaComprada = null;
+        let placarJogador = 0;
+        let placarOponente = 0;
+
+        // 2. Funções do Baralho
+        function criarBaralho() {
+            let baralho = [];
+            idUnicoCarta = 0;
+            for (let i = 0; i < 2; i++) { 
+                for (const naipe of naipes) { 
+                    for (const valor of valores) { 
+                        baralho.push({ valor, naipe, id: idUnicoCarta++ }); 
+                    } 
+                } 
+            }
+            return baralho;
+        }
+        
+        function embaralhar(baralho) {
+            for (let i = baralho.length - 1; i > 0; i--) { 
+                const j = Math.floor(Math.random() * (i + 1));
+                [baralho[i], baralho[j]] = [baralho[j], baralho[i]]; 
+            }
+        }
+
+        // 3. Funções de Lógica do Jogo
+        function iniciarPartida() {
+            const baralhoCompleto = criarBaralho();
+            embaralhar(baralhoCompleto);
+            monteCompra = [...baralhoCompleto];
+            jogadores = [[], []];
+            lixo = [];
+            jogosBaixados = [];
+            tresVermelhosBaixados = [];
+            cartasSelecionadas = [];
+            podeComprar = true;
+            idCartaComprada = null;
+            
+            atualizarPlacarGeral();
+
+            for (let i = 0; i < 15; i++) { 
+                for (let j = 0; j < jogadores.length; j++) { 
+                    jogadores[j].push(monteCompra.pop()); 
+                } 
+            }
+            
+            verificarTresVermelhosNaMaoInicial();
+            
+            let cartaInicialLixo = monteCompra.pop();
+            while (isTresVermelho(cartaInicialLixo)) {
+                baixarTresVermelho(cartaInicialLixo, -1);
+                cartaInicialLixo = monteCompra.pop();
+            }
+            lixo.push(cartaInicialLixo);
+            renderizarTudo();
+            adicionarEventListeners();
+        }
+
+        function isTresVermelho(carta) { 
+            return carta.valor === '3' && (carta.naipe === '♥️' || carta.naipe === '♦️'); 
+        }
+        
+        function isTresPreto(carta) { 
+            return carta.valor === '3' && (carta.naipe === '♠️' || carta.naipe === '♣️'); 
+        }
+        
+        function baixarTresVermelho(carta, jogadorIdx) { 
+            tresVermelhosBaixados.push({carta: carta, dono: jogadorIdx}); 
+        }
+        
+        function comprarReposicao(jogadorIdx) {
+            if (monteCompra.length > 0) {
+                const cartaReposta = monteCompra.pop();
+                if (isTresVermelho(cartaReposta)) {
+                    baixarTresVermelho(cartaReposta, jogadorIdx);
+                    comprarReposicao(jogadorIdx);
+                } else {
+                    jogadores[jogadorIdx].push(cartaReposta);
+                }
+            }
+        }
+        
+        function verificarTresVermelhosNaMaoInicial() {
+            for (let i = 0; i < jogadores.length; i++) {
+                let tresEncontrados = jogadores[i].filter(isTresVermelho);
+                if (tresEncontrados.length > 0) {
+                    jogadores[i] = jogadores[i].filter(carta => !isTresVermelho(carta));
+                    tresEncontrados.forEach(carta => baixarTresVermelho(carta, i));
+                    for(let j = 0; j < tresEncontrados.length; j++) { 
+                        comprarReposicao(i); 
+                    }
+                }
+            }
+        }
+        
+        function comprarDoMonte() {
+            if (!podeComprar || jogadorAtual !== 0) return;
+            if (monteCompra.length > 0) {
+                let cartaComprada = monteCompra.pop();
+                if (isTresVermelho(cartaComprada)) {
+                    baixarTresVermelho(cartaComprada, jogadorAtual);
+                    renderizarTudo();
+                    animarCarta(document.querySelector(`#tres-vermelhos .carta[data-id='${cartaComprada.id}']`), false);
+                    comprarDoMonte();
+                    return;
+                }
+                jogadores[jogadorAtual].push(cartaComprada);
+                podeComprar = false;
+                idCartaComprada = cartaComprada.id;
+                renderizarTudo();
+                animarCartaNaMao(cartaComprada.id, true);
+            } else { 
+                finalizarRodada(false); 
+            }
+        }
+
+        function comprarDoLixo() {
+            if (!podeComprar || jogadorAtual !== 0) return;
+            if (lixo.length === 0) return;
+            const topoLixo = lixo[lixo.length - 1];
+            if (isTresPreto(topoLixo)) { 
+                alert("O lixo está travado com um 3 preto!"); 
+                return; 
+            }
+
+            const maoJogador = jogadores[jogadorAtual];
+            let podeBaixar = false;
+            let cartasParaBaixar = [];
+            let indicesDaMao = [];
+            
+            for (let i = 0; i < maoJogador.length; i++) {
+                for (let j = i + 1; j < maoJogador.length; j++) {
+                    const trioSelecionado = [topoLixo, maoJogador[i], maoJogador[j]];
+                    if (validarJogo(trioSelecionado)) {
+                        podeBaixar = true;
+                        cartasParaBaixar = trioSelecionado;
+                        indicesDaMao = [i, j];
+                        break;
+                    }
+                }
+                if (podeBaixar) break;
+            }
+
+            if (podeBaixar) {
+                const indices = indicesDaMao.sort((a,b) => b - a);
+                indices.forEach(idx => jogadores[jogadorAtual].splice(idx, 1));
+                const novoJogo = { cartas: cartasParaBaixar.map(c => ({...c})), tipo: 'jogo', pontos: 0, dono: jogadorAtual };
+                jogosBaixados.push(novoJogo);
+                jogadores[jogadorAtual].push(...lixo);
+                lixo = [];
+                podeComprar = false;
+                verificarCanastras();
+                renderizarTudo();
+            } else {
+                alert("Você não tem cartas na mão para formar um jogo com o topo do lixo!");
+            }
+        }
+
+        function selecionarCarta(carta, index) {
+            if (podeComprar || jogadorAtual !== 0) return;
+            const jaSelecionadaIndex = cartasSelecionadas.findIndex(c => c.index === index);
+            if (jaSelecionadaIndex > -1) { 
+                cartasSelecionadas.splice(jaSelecionadaIndex, 1); 
+            } else { 
+                cartasSelecionadas.push({ ...carta, index }); 
+            }
+            renderizarTudo();
+        }
+
+        function validarJogo(cartas) {
+            if (cartas.length < 3) return false;
+            if (cartas.some(isTresVermelho)) return false;
+
+            const curingas = cartas.filter(c => c.valor === '2');
+            const normais = cartas.filter(c => c.valor !== '2');
+
+            if (normais.length === 0) return false;
+
+            const naipeDoJogo = normais[0].naipe;
+            if (!normais.every(c => c.naipe === naipeDoJogo)) return false;
+
+            let valoresOrdenados = normais.map(c => valoresCartas[c.valor]).sort((a, b) => a - b);
+            if (valoresOrdenados.includes(1) && valoresOrdenados.includes(13)) {
+                valoresOrdenados = valoresOrdenados.filter(v => v !== 1);
+                valoresOrdenados.push(14);
+                valoresOrdenados.sort((a, b) => a - b);
+            }
+
+            for (let i = 0; i < valoresOrdenados.length - 1; i++) {
+                if (valoresOrdenados[i] === valoresOrdenados[i+1]) return false;
+            }
+            let gaps = 0;
+            for (let i = 0; i < valoresOrdenados.length - 1; i++) {
+                gaps += valoresOrdenados[i+1] - valoresOrdenados[i] - 1;
+            }
+            if (curingas.length < gaps) return false;
+
+            const isNaipeVermelho = naipeDoJogo === '♥️' || naipeDoJogo === '♦️';
+            if (curingas.length <= 1) return true;
+            if (curingas.length === 2) {
+                if (isNaipeVermelho) return false;
+                const temAs = normais.some(c => c.valor === 'A');
+                const temDoisNatural = normais.some(c => c.valor === '2' && c.naipe === naipeDoJogo);
+                return temAs && temDoisNatural;
+            }
+            if (curingas.length > 2) return false;
+            
+            return true;
+        }
+
+        function baixarJogoSelecionado() {
+            if (podeComprar || jogadorAtual !== 0) return;
+            if (validarJogo(cartasSelecionadas.map(c => c))) {
+                const jogoParaBaixar = cartasSelecionadas.map(c => ({...c}));
+                jogosBaixados.push({ cartas: jogoParaBaixar, tipo: 'jogo', pontos: 0, dono: jogadorAtual });
+                const indicesParaRemover = cartasSelecionadas.map(c => c.index).sort((a, b) => b - a);
+                indicesParaRemover.forEach(index => jogadores[jogadorAtual].splice(index, 1));
+                cartasSelecionadas = [];
+                verificarCanastras();
+                renderizarTudo();
+                animarCartasBaixadas(jogosBaixados.length - 1, false);
+                if (jogadores[jogadorAtual].length === 0) {
+                    verificarBatida();
+                }
+            } else {
+                alert("Jogo inválido!");
+                cartasSelecionadas = [];
+                renderizarTudo();
+            }
+        }
+
+        function descartarCartaSelecionada() {
+            if (podeComprar || jogadorAtual !== 0) return;
+            if (cartasSelecionadas.length !== 1) { 
+                alert("Selecione apenas UMA carta para descartar."); 
+                return; 
+            }
+            const cartaParaDescartar = cartasSelecionadas[0];
+            if (isTresVermelho(cartaParaDescartar)) {
+                alert("Você não pode descartar um 3 vermelho!");
+                cartasSelecionadas = [];
+                renderizarTudo();
+                return;
+            }
+            const cartaDescartada = jogadores[jogadorAtual].splice(cartaParaDescartar.index, 1)[0];
+            lixo.push(cartaDescartada);
+            idCartaComprada = null;
+            cartasSelecionadas = [];
+            if (jogadores[jogadorAtual].length === 0) {
+                verificarBatida();
+            } else {
+                podeComprar = true;
+                jogadorAtual = 1;
+                renderizarTudo();
+                animarCarta(document.getElementById('lixo'), false);
+                setTimeout(jogarTurnoDoBot, 2000);
+            }
+        }
+
+        function adicionarCartaAoJogo(jogoIndex) {
+            if (podeComprar || jogadorAtual !== 0) { return; }
+            if (cartasSelecionadas.length === 0) { return; }
+            const jogo = jogosBaixados[jogoIndex];
+            if (jogo.dono !== jogadorAtual) {
+                alert("Você só pode adicionar cartas aos seus próprios jogos.");
+                return;
+            }
+            const cartasParaAdicionar = cartasSelecionadas.map(c => ({ ...c }));
+            const todasCartas = [...jogo.cartas, ...cartasParaAdicionar];
+            if (!validarJogo(todasCartas)) {
+                alert("As cartas selecionadas não são válidas para este jogo.");
+                cartasSelecionadas = [];
+                renderizarTudo();
+                return;
+            }
+            jogo.cartas.push(...cartasParaAdicionar);
+            jogo.cartas.sort((a, b) => valoresCartas[a.valor] - valoresCartas[b.valor]);
+            const indicesParaRemover = cartasSelecionadas.map(c => c.index).sort((a, b) => b - a);
+            indicesParaRemover.forEach(index => jogadores[jogadorAtual].splice(index, 1));
+            cartasSelecionadas = [];
+            verificarCanastras();
+            renderizarTudo();
+            animarCartasBaixadas(jogoIndex, false);
+            if (jogadores[jogadorAtual].length === 0) {
+                verificarBatida();
+            }
+        }
+
+        function verificarCanastras() {
+            jogosBaixados.forEach(jogo => {
+                if (jogo.cartas.length >= 7 && jogo.tipo === 'jogo') {
+                    const temCuringa = jogo.cartas.some(c => c.valor === '2');
+                    if (temCuringa) {
+                        jogo.tipo = 'Canastra Suja';
+                        jogo.pontos = 200;
+                    } else {
+                        jogo.tipo = 'Canastra Limpa';
+                        jogo.pontos = 500;
+                    }
+                }
+            });
+        }
+
+        function verificarBatida() {
+            const temCanastraLimpa = jogosBaixados.some(j => j.dono === jogadorAtual && j.tipo === 'Canastra Limpa');
+            if (temCanastraLimpa) {
+                finalizarRodada(true);
+            } else {
+                alert("Batida inválida! Você precisa de pelo menos uma Canastra Limpa na mesa para bater.");
+            }
+        }
+
+        function finalizarRodada(houveBatida) {
+            // Lógica de pontuação para 2 jogadores (simplificada)
+            // ...
+            alert("Fim da rodada!");
+            setTimeout(iniciarPartida, 5000);
+        }
+
+        function animarCarta(elemento, permanente = false) {
+            if(!elemento) return;
+            elemento.classList.add('carta-animada');
+            setTimeout(() => {
+                elemento.classList.remove('carta-animada');
+                if(permanente) {
+                    elemento.classList.add('carta-comprada');
+                }
+            }, 1500);
+        }
+        
+        function animarCartaNaMao(idCarta, permanente) {
+            const maoDiv = document.getElementById('mao-jogador');
+            const cartaDiv = maoDiv.querySelector(`.carta[data-id='${idCarta}']`);
+            animarCarta(cartaDiv, permanente);
+        }
+        
+        function animarCartasBaixadas(jogoIndex, permanente) {
+            const jogoContainer = document.querySelectorAll('#jogos-jogador-container .jogo-container')[jogoIndex];
+            if(jogoContainer) jogoContainer.querySelectorAll('.carta').forEach(c => animarCarta(c, permanente));
+        }
+
+        function renderizarTudo() {
+            const monteDiv = document.getElementById('monte-compra');
+            const lixoDiv = document.getElementById('lixo');
+            const acoesContainer = document.getElementById('acoes-container');
+
+            // Reseta as animações
+            monteDiv.classList.remove('acao-ativa');
+            lixoDiv.classList.remove('acao-ativa');
+            acoesContainer.classList.remove('acao-ativa');
+            
+            // LÓGICA DE DESTAQUE DE TURNO
+            if (podeComprar && jogadorAtual === 0) {
+                monteDiv.classList.add('acao-ativa');
+                lixoDiv.classList.add('acao-ativa');
+            } else if (!podeComprar && jogadorAtual === 0) {
+                acoesContainer.classList.add('acao-ativa');
+            }
+
+            const acoesVisiveis = !podeComprar && jogadorAtual === 0;
+            acoesContainer.style.display = acoesVisiveis ? 'flex' : 'none';
+
+            // Renderiza mão do jogador (Jogador 0)
+            const maoJogadorDiv = document.getElementById('mao-jogador');
+            maoJogadorDiv.innerHTML = '';
+            
+            // ORDENAÇÃO POR NÚMERO E DEPOIS POR NAIPE
+            jogadores[0].sort((a, b) => {
+                if (valoresCartas[a.valor] !== valoresCartas[b.valor]) {
+                    return valoresCartas[a.valor] - valoresCartas[b.valor];
+                } else {
+                    return ordemNaipes[a.naipe] - ordemNaipes[b.naipe];
+                }
+            });
+
+            jogadores[0].forEach((carta, index) => {
+                const cartaDiv = document.createElement('div');
+                cartaDiv.classList.add('carta');
+                cartaDiv.dataset.id = carta.id;
+                if (carta.naipe === '♥️' || carta.naipe === '♦️') cartaDiv.classList.add('vermelha');
+                if (cartasSelecionadas.some(c => c.index === index)) cartaDiv.classList.add('selecionada');
+                if (idCartaComprada === carta.id) cartaDiv.classList.add('carta-comprada');
+                cartaDiv.textContent = `${carta.valor}${carta.naipe}`;
+                cartaDiv.addEventListener('click', () => selecionarCarta(carta, index));
+                maoJogadorDiv.appendChild(cartaDiv);
+            });
+            
+            const maoOponenteDiv = document.getElementById('mao-oponente');
+            maoOponenteDiv.innerHTML = '';
+            for(let i = 0; i < jogadores[1].length; i++) {
+                const cartaDiv = document.createElement('div');
+                cartaDiv.classList.add('carta', 'verso');
+                maoOponenteDiv.appendChild(cartaDiv);
+            }
+            
+            if (lixo.length > 0) {
+                const topoLixo = lixo[lixo.length - 1];
+                lixoDiv.textContent = `${topoLixo.valor}${topoLixo.naipe}`;
+                lixoDiv.className = 'carta';
+                if (topoLixo.naipe === '♥️' || topoLixo.naipe === '♦️') lixoDiv.classList.add('vermelha');
+                if (isTresPreto(topoLixo)) lixoDiv.classList.add('travado');
+            } else {
+                lixoDiv.textContent = '';
+                lixoDiv.className = 'carta';
+            }
+            document.getElementById('monte-compra-contador').textContent = monteCompra.length;
+
+            const jogosJogadorDiv = document.getElementById('jogos-jogador-container');
+            const jogosOponenteDiv = document.getElementById('jogos-oponente-container');
+            jogosJogadorDiv.innerHTML = '';
+            jogosOponenteDiv.innerHTML = '';
+            
+            jogosBaixados.forEach((jogo, index) => {
+                const container = document.createElement('div');
+                container.classList.add('jogo-container');
+                if (jogo.tipo !== 'jogo') {
+                    const info = document.createElement('div');
+                    info.classList.add('canastra-info');
+                    if (jogo.tipo === 'Canastra Limpa') info.classList.add('canastra-limpa');
+                    if (jogo.tipo === 'Canastra Suja') info.classList.add('canastra-suja');
+                    info.textContent = `${jogo.tipo} (${jogo.pontos} Pts)`;
+                    container.appendChild(info);
+                }
+                const jogoDiv = document.createElement('div');
+                jogoDiv.classList.add('jogo');
+                if (jogo.dono === 0) {
+                    jogoDiv.addEventListener('click', () => adicionarCartaAoJogo(index));
+                }
+                jogo.cartas.forEach(carta => {
+                    const cartaDiv = document.createElement('div');
+                    cartaDiv.classList.add('carta');
+                    cartaDiv.dataset.id = carta.id;
+                    if (carta.naipe === '♥️' || carta.naipe === '♦️') cartaDiv.classList.add('vermelha');
+                    cartaDiv.textContent = `${carta.valor}${carta.naipe}`;
+                    jogoDiv.appendChild(cartaDiv);
+                });
+                container.appendChild(jogoDiv);
+                
+                if (jogo.dono === 0) {
+                    jogosJogadorDiv.appendChild(container);
+                } else {
+                    jogosOponenteDiv.appendChild(container);
+                }
+            });
+
+            const tresVermelhosDiv = document.getElementById('tres-vermelhos');
+            tresVermelhosDiv.innerHTML = '';
+            tresVermelhosBaixados.forEach(item => {
+                const cartaDiv = document.createElement('div');
+                cartaDiv.classList.add('carta', 'vermelha');
+                cartaDiv.dataset.id = item.carta.id;
+                cartaDiv.textContent = `${item.carta.valor}${item.carta.naipe}`;
+                tresVermelhosDiv.appendChild(cartaDiv);
+            });
+            
+            // Atualiza contadores de cartas
+            document.getElementById('contador-cartas-jogador').textContent = jogadores[0].length;
+            document.getElementById('contador-cartas-oponente').textContent = jogadores[1].length;
+        }
+
+        function atualizarPlacarGeral() {
+            document.getElementById('placar-jogador').textContent = `${placarJogador} Pts`;
+            document.getElementById('placar-oponente').textContent = `${placarOponente} Pts`;
+        }
+
+        function adicionarEventListeners() {
+            document.getElementById('monte-compra').onclick = comprarDoMonte;
+            document.getElementById('lixo').onclick = comprarDoLixo;
+            document.getElementById('btn-baixar-jogo').onclick = baixarJogoSelecionado;
+            document.getElementById('btn-descartar').onclick = descartarCartaSelecionada;
+            document.getElementById('btn-bater').onclick = verificarBatida;
+        }
+
+        // Função para o bot jogar
+        function jogarTurnoDoBot() {
+            console.log("Bot jogando...");
+            
+            // Lógica simples para o bot:
+            // 1. Se pode comprar, compra do monte
+            if (podeComprar) {
+                console.log("Bot comprando do monte...");
+                // Simula compra do monte
+                if (monteCompra.length > 0) {
+                    let cartaComprada = monteCompra.pop();
+                    if (isTresVermelho(cartaComprada)) {
+                        baixarTresVermelho(cartaComprada, 1);
+                        renderizarTudo();
+                        // Continua comprando se tirou um três vermelho
+                        setTimeout(jogarTurnoDoBot, 1000);
+                        return;
+                    }
+                    jogadores[1].push(cartaComprada);
+                    podeComprar = false;
+                    renderizarTudo();
+                    
+                    // Após comprar, espera um pouco e então descarta
+                    setTimeout(() => {
+                        descartarCartaBot();
+                    }, 1500);
+                }
+            } 
+            // 2. Se não pode comprar, descarta uma carta
+            else {
+                console.log("Bot descartando...");
+                descartarCartaBot();
+            }
+        }
+
+        // Função para o bot descartar uma carta
+        function descartarCartaBot() {
+            if (jogadores[1].length === 0) return;
+            
+            // Encontra uma carta que não seja três vermelho para descartar
+            let cartaParaDescartar = null;
+            let indexParaDescartar = -1;
+            
+            for (let i = 0; i < jogadores[1].length; i++) {
+                if (!isTresVermelho(jogadores[1][i])) {
+                    cartaParaDescartar = jogadores[1][i];
+                    indexParaDescartar = i;
+                    break;
+                }
+            }
+            
+            // Se não encontrou carta que não seja três vermelho, descarta a primeira
+            if (indexParaDescartar === -1) {
+                indexParaDescartar = 0;
+                cartaParaDescartar = jogadores[1][0];
+            }
+            
+            // Remove a carta da mão do bot e coloca no lixo
+            const cartaDescartada = jogadores[1].splice(indexParaDescartar, 1)[0];
+            lixo.push(cartaDescartada);
+            podeComprar = true;
+            jogadorAtual = 0; // Volta a vez para o jogador
+            
+            renderizarTudo();
+            console.log("Bot descartou: ", cartaDescartada.valor + cartaDescartada.naipe);
+            
+            // Anima a carta descartada
+            animarCarta(document.getElementById('lixo'), false);
+        }
+
+        window.onload = function() {
+            iniciarPartida();
+        };
+    </script>
 </body>
 </html>
