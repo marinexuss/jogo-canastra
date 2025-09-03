@@ -1,201 +1,189 @@
-body {
+/* --- CONFIGURAÇÃO GERAL DE TELA CHEIA --- */
+:root {
+    --altura-carta-mao: 20vh;
+    --largura-carta-mao: calc(var(--altura-carta-mao) * 0.7);
+}
+
+html, body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
     font-family: Arial, sans-serif;
     background-color: #0f4d1d;
     color: white;
-    padding: 20px;
+    overflow: hidden;
+    user-select: none;
 }
 
-h1, h2, h3 {
-    text-align: center;
+#game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+/* --- ÁREAS PRINCIPAIS --- */
+#area-oponente, #area-do-jogador {
+    flex-shrink: 0;
+}
+
+#area-da-mesa {
+    flex-grow: 1;
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin: 5px 0;
+    overflow: hidden;
+}
+
+/* --- COMPONENTES DO JOGO --- */
+.info-jogador {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.4);
+    padding: 2px 10px;
+    border-radius: 10px;
+    margin: 0 auto 5px auto;
+    width: fit-content;
+    height: 25px;
+}
+
+.mao {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+}
+
+#mao-oponente {
+    height: calc(var(--altura-carta-mao) * 0.5);
 }
 
 #mao-jogador {
-    margin-top: 30px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    height: var(--altura-carta-mao);
 }
 
 .carta {
-    width: 80px;
-    height: 120px;
+    height: var(--altura-carta-mao);
+    width: var(--largura-carta-mao);
+    border: 1px solid black;
     background-color: white;
     color: black;
-    border: 3px solid #333;
     border-radius: 8px;
-    margin: 5px;
-    padding: 10px;
-    font-size: 24px;
+    font-size: 2.5vh;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
     transition: all 0.2s ease-in-out;
     cursor: pointer;
+    box-sizing: border-box;
+    position: relative; /* Para z-index funcionar */
 }
 
-.carta.travado {
-    transform: rotate(90deg);
+#mao-jogador .carta {
+    margin-right: calc(var(--largura-carta-mao) * -0.7); /* Sobrepõe 70% */
+}
+#mao-jogador .carta:hover {
+    transform: translateY(-25px);
+    z-index: 100;
+}
+#mao-jogador .carta.selecionada {
+    transform: translateY(-30px);
+    border: 3px solid #ffdf00;
 }
 
-.carta.vermelha {
-    color: #d10a0a;
+#mao-oponente .carta {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 7/10; /* Mantém proporção da carta */
+    margin-right: -5vw;
 }
 
-#mesa {
+#pilar-central {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 20px;
-    min-height: 150px;
-}
-
-#monte-compra-container, #lixo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
-#lixo:hover, .carta.verso:hover {
-    border-color: #f0e68c;
-}
-
-.carta.verso {
-    background-color: #55a;
-    background-image: linear-gradient(45deg, #0003, #0000);
-    color: transparent;
-}
-
-.carta.selecionada {
-    border-color: #ffdf00;
-    transform: translateY(-10px);
-}
-
-#jogos-baixados-container, #tres-vermelhos-container {
-    min-height: 180px;
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-}
-
-#jogos-baixados, #tres-vermelhos {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
     gap: 10px;
 }
-
-.jogo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
+#pilar-central .carta {
+    height: calc(var(--altura-carta-mao) * 0.8);
+    width: calc(var(--largura-carta-mao) * 0.8);
+    font-size: 2.2vh;
 }
 
-.jogo {
-    display: flex;
-    padding: 5px;
-    border: 2px solid #ccc;
+#monte-compra-contador {
+    background-color: rgba(0,0,0,0.5);
+    padding: 2px 5px;
     border-radius: 5px;
-    cursor: pointer;
+    font-size: 0.8em;
 }
 
-.canastra-info {
-    font-weight: bold;
-    font-size: 14px;
+.container-jogos-baixados {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 5px;
+    width: 38%;
+    overflow-y: auto;
 }
-.canastra-limpa {
-    border-color: #ffdf00;
+.container-jogos-baixados .jogo {
+    margin-bottom: 5px;
+    display: flex;
+    flex-wrap: wrap;
 }
-.canastra-suja {
-    border-color: #c0c0c0;
+.container-jogos-baixados .carta {
+    height: calc(var(--altura-carta-mao) * 0.5);
+    width: calc(var(--largura-carta-mao) * 0.5);
+    font-size: 1.5vh;
+    border-width: 1px;
+    margin-right: -15px;
 }
+
+.canastra-info { font-weight: bold; font-size: 12px; text-align: center; width: 100%;}
+.canastra-limpa { border: 2px solid #ffdf00; padding: 3px; border-radius: 8px; }
+.canastra-suja { border: 2px solid #c0c0c0; padding: 3px; border-radius: 8px; }
+
+#tres-vermelhos-container {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+#tres-vermelhos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    min-height: calc(var(--altura-carta-mao) * 0.45);
+}
+#tres-vermelhos .carta {
+    height: calc(var(--altura-carta-mao) * 0.4);
+    width: calc(var(--largura-carta-mao) * 0.4);
+    font-size: 1.4vh;
+}
+
+.carta.verso { background-color: #55a; background-image: linear-gradient(45deg, #0003, #0000); color: transparent; }
+.carta.vermelha { color: #d10a0a; }
 
 #acoes-container {
-    text-align: center;
-    margin-top: 20px;
+    padding: 5px 0;
+    height: 40px;
 }
+#btn-baixar-jogo, #btn-descartar { padding: 8px 15px; font-size: 14px; font-weight: bold; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 0 10px; }
+#btn-baixar-jogo { background-color: #4CAF50; }
+#btn-descartar { background-color: #f44336; }
 
-#btn-baixar-jogo, #btn-descartar {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 0 10px;
+.acao-ativa { animation: pulsarVerde 1.5s infinite; }
+@keyframes pulsarVerde { 
+    50% { box-shadow: 0 0 25px 12px rgba(120, 255, 120, 0.8); }
 }
-
-#btn-baixar-jogo {
-    background-color: #4CAF50;
-}
-#btn-baixar-jogo:hover {
-    background-color: #45a049;
-}
-
-#btn-descartar {
-    background-color: #f44336;
-}
-#btn-descartar:hover {
-    background-color: #da190b;
-}
-
-/* --- NOVAS ANIMAÇÕES --- */
-
-/* Animação temporária de piscar com luz amarela */
-.carta-animada {
-    animation: piscarComLuz 0.5s 3; /* 0.5s de duração, 3 repetições */
-}
-
-@keyframes piscarComLuz {
-    50% {
-        opacity: 0.5;
-        box-shadow: 0 0 15px 7px rgba(255, 255, 100, 0.8); /* Luz amarela */
-    }
-}
-
-/* Estilo permanente para a carta comprada no turno */
-.carta-comprada {
-    border-color: #64b4ff; /* Borda azul clara */
-    box-shadow: 0 0 15px 7px rgba(100, 180, 255, 0.7); /* Luz azul */
-}
-/* --- Estilos para o Placar Geral --- */
-#placar-geral {
-    display: flex;
-    justify-content: space-around;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 10px;
-    margin: 0 auto 20px auto;
-    border-radius: 10px;
-    max-width: 600px;
-    border: 2px solid #ddd;
-}
-
-.placar-dupla {
-    text-align: center;
-}
-
-.placar-dupla h3 {
-    margin: 0 0 5px 0;
-    font-size: 1em;
-}
-
-.placar-dupla span {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #ffdf00;
-}
-/* --- Estilo para o Status Vulnerável --- */
-.status-vulneravel {
-    display: block;
-    margin-top: 5px;
-    font-size: 0.8em;
-    color: #f44336; /* Vermelho */
-    font-weight: bold;
-    height: 1em; /* Garante que o layout não mude quando o texto aparece */
-}
+#acoes-container.acao-ativa button { animation: pulsarVerde 1.5s infinite; }
+.carta-animada { animation: piscarComLuz 0.5s 3; }
+@keyframes piscarComLuz { 50% { opacity: 0.5; box-shadow: 0 0 15px 7px rgba(255, 255, 100, 0.8); } }
+.carta-comprada { border: 3px solid #64b4ff; box-shadow: 0 0 15px 7px rgba(100, 180, 255, 0.7); }

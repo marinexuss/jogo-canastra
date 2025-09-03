@@ -2,52 +2,57 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Canastra - Terno Vermelho</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Terno Vermelho</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Terno Vermelho</h1>
 
-    <div id="placar-geral">
-        <div class="placar-dupla">
-            <h3>Dupla 1 (J1 & J3)</h3>
-            <span id="placar-dupla1">0</span>
-            <span class="status-vulneravel" id="status-dupla1"></span> </div>
-        <div class="placar-dupla">
-            <h3>Dupla 2 (J2 & J4)</h3>
-            <span id="placar-dupla2">0</span>
-            <span class="status-vulneravel" id="status-dupla2"></span> </div>
-    </div>
+    <main id="game-container">
 
-    <div id="mesa">
-        <div id="monte-compra-container">
-            <span>Monte</span>
-            <div id="monte-compra" class="carta verso"></div>
-        </div>
-        <div id="lixo-container">
-            <span>Lixo</span>
-            <div id="lixo" class="carta"></div>
-        </div>
-    </div>
+        <header id="area-oponente">
+            <div class="info-jogador">
+                <span>Máquina</span>
+                <span id="placar-oponente">0 Pts</span>
+            </div>
+            <div id="mao-oponente" class="mao">
+                </div>
+        </header>
 
-    <div id="tres-vermelhos-container">
-        <h3>3s Vermelhos Baixados</h3>
-        <div id="tres-vermelhos"></div>
-    </div>
+        <section id="area-da-mesa">
+            <div class="container-jogos-baixados" id="jogos-oponente-container">
+                </div>
+            
+            <div id="pilar-central">
+                <div id="tres-vermelhos-container">
+                    </div>
+                <div id="monte-compra-container">
+                    <div id="monte-compra" class="carta verso"></div>
+                    <span id="monte-compra-contador">0</span>
+                </div>
+                <div id="lixo-container">
+                    <div id="lixo" class="carta"></div>
+                </div>
+            </div>
 
-    <div id="jogos-baixados-container">
-        <h2>Jogos Baixados</h2>
-        <div id="jogos-baixados"></div>
-    </div>
+            <div class="container-jogos-baixados" id="jogos-jogador-container">
+                </div>
+        </section>
 
-    <h2>Sua Mão (Jogador 1)</h2>
-    <div id="mao-jogador"></div>
+        <footer id="area-do-jogador">
+            <div id="mao-jogador" class="mao">
+                </div>
+            <div class="info-jogador">
+                <span>Você</span>
+                <span id="placar-jogador">0 Pts</span>
+            </div>
+            <div id="acoes-container">
+                <button id="btn-baixar-jogo">Baixar Jogo</button>
+                <button id="btn-descartar" class="btn-vermelho">Descartar</button>
+            </div>
+        </footer>
 
-    <div id="acoes-container">
-        <button id="btn-baixar-jogo">Baixar Jogo</button>
-        <button id="btn-descartar" class="btn-vermelho">Descartar</button>
-    </div>
+    </main>
     
     <script src="jogo.js" defer></script>
 </body>
