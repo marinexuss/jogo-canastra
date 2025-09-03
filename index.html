@@ -1,59 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Terno Vermelho</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terno Vermelho</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <main id="game-container">
-
-        <header id="area-oponente">
-            <div class="info-jogador">
-                <span>Máquina</span>
-                <span id="placar-oponente">0 Pts</span>
-            </div>
-            <div id="mao-oponente" class="mao">
-                </div>
-        </header>
-
-        <section id="area-da-mesa">
-            <div class="container-jogos-baixados" id="jogos-oponente-container">
-                </div>
-            
-            <div id="pilar-central">
-                <div id="tres-vermelhos-container">
-                    </div>
-                <div id="monte-compra-container">
-                    <div id="monte-compra" class="carta verso"></div>
-                    <span id="monte-compra-contador">0</span>
-                </div>
-                <div id="lixo-container">
-                    <div id="lixo" class="carta"></div>
-                </div>
-            </div>
-
-            <div class="container-jogos-baixados" id="jogos-jogador-container">
-                </div>
-        </section>
-
-        <footer id="area-do-jogador">
-            <div id="mao-jogador" class="mao">
-                </div>
-            <div class="info-jogador">
-                <span>Você</span>
-                <span id="placar-jogador">0 Pts</span>
-            </div>
-            <div id="acoes-container">
-                <button id="btn-baixar-jogo">Baixar Jogo</button>
-                <button id="btn-descartar" class="btn-vermelho">Descartar</button>
-            </div>
-        </footer>
-
-    </main>
+  <div class="game-container">
     
-    <script src="jogo.js" defer></script>
+    <!-- Oponente -->
+    <div class="opponent">
+      <h2>Oponente</h2>
+      <div class="hand opponent-hand">
+        <!-- Cartas do oponente (costas viradas) -->
+        <div class="card back"></div>
+        <div class="card back"></div>
+        <div class="card back"></div>
+        <div class="card back"></div>
+        <div class="card back"></div>
+      </div>
+    </div>
+
+    <!-- Mesa -->
+    <div class="table">
+      <div class="pile">
+        <h3>Monte</h3>
+        <div class="card back"></div>
+      </div>
+      <div class="discard">
+        <h3>Lixo</h3>
+        <div class="card">7♠</div>
+      </div>
+    </div>
+
+    <!-- Jogador -->
+    <div class="player">
+      <h2>Você</h2>
+      <div class="hand player-hand">
+        <div class="card">A♠</div>
+        <div class="card">10♥</div>
+        <div class="card">3♦</div>
+        <div class="card">Q♣</div>
+        <div class="card">K♥</div>
+      </div>
+      <div class="actions">
+        <button>Comprar do Monte</button>
+        <button>Comprar do Lixo</button>
+        <button>Descartar</button>
+      </div>
+    </div>
+
+  </div>
 </body>
 </html>

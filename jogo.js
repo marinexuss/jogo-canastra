@@ -95,7 +95,7 @@ function comprarDoMonte() {
         if (isTresVermelho(cartaComprada)) {
             baixarTresVermelho(cartaComprada, jogadorAtual);
             renderizarTudo();
-            comprarDoMonte(); // Compra de reposição
+            comprarDoMonte();
             return;
         }
         jogadores[jogadorAtual].push(cartaComprada);
@@ -129,34 +129,111 @@ function descartarCartaSelecionada() {
     idCartaComprada = null;
     cartasSelecionadas = [];
     
-    podeComprar = false; // Bloqueia compra para o jogador
-    jogadorAtual = 1; // Passa a vez para a máquina
+    podeComprar = false;
+    jogadorAtual = 1;
     renderizarTudo();
     animarCarta(document.getElementById('lixo'), false);
-    setTimeout(jogarTurnoDoBot, 2000); // Chama a vez do bot após um delay
+    setTimeout(jogarTurnoDoBot, 2000);
+}
+// =================== FIM DA PARTE 1 ===================
+// =================================================================
+// O CÓDIGO CONTINUA DAQUI (INÍCIO DA PARTE 2)
+// =================================================================
+
+function finalizarRodada(houveBatida) {
+    let placarRodadaJogador = 0;
+    let placarRodadaOponente = 0;
+
+    // 1. Soma pontos das canastras e cartas na mesa
+    jogosBaixados.forEach(jogo => {
+        let pontosDoJogo = jogo.pontos;
+        jogo.cartas.forEach(carta => {
+            if (!isTresVermelho(carta.carta)) { // Acessa a propriedade 'carta' do objeto
+                pontosDoJogo += pontosPorCarta[carta.valor] || 0;
+            }
+        });
+        if (jogo.dono === 0) { // Jogador Humano
+            placarRodadaJogador += pontosDoJogo;
+        } else { // Máquina
+            placarRodadaOponente += pontosDoJogo;
+        }
+    });
+
+    // 2. Bônus de batida
+    if (houveBatida) {
+        if (jogadorAtual === 0) {
+            placarRodadaJogador += 100;
+        } else {
+            placarRodadaOponente += 100;
+        }
+    }
+    
+    // 3. Contabiliza 3s Vermelhos
+    const jogadorFezCanastra = jogosBaixados.some(j => j.dono === 0 && j.cartas.length >= 7);
+    const oponenteFezCanastra = jogosBaixados.some(j => j.dono === 1 && j.cartas.length >= 7);
+
+    tresVermelhosBaixados.forEach(item => {
+        if (item.dono === 0) {
+            placarRodadaJogador += jogadorFezCanastra ? 100 : -100;
+        } else if (item.dono === 1) {
+            placarRodadaOponente += oponenteFezCanastra ? 100 : -100;
+        }
+    });
+    
+    // 4. Subtrai pontos das cartas na mão de quem não bateu
+    if (houveBatida) {
+        const perdedorIndex = 1 - jogadorAtual;
+        let pontosNegativos = 0;
+        jogadores[perdedorIndex].forEach(carta => {
+            pontosNegativos += pontosPorCarta[carta.valor] || 0;
+        });
+        if (perdedorIndex === 0) {
+            placarRodadaJogador -= pontosNegativos;
+        } else {
+            placarRodadaOponente -= pontosNegativos;
+        }
+    }
+    
+    placarJogador += placarRodadaJogador;
+    placarOponente += placarRodadaOponente;
+
+    let mensagem = `FIM DA RODADA!\n\n`;
+    if (houveBatida) {
+        mensagem += `O jogador ${jogadorAtual === 0 ? 'Você' : 'Máquina'} bateu!\n\n`;
+    }
+    mensagem += `PONTUAÇÃO DA RODADA:\n`;
+    mensagem += `Você: ${placarRodadaJogador} pontos\n`;
+    mensagem += `Máquina: ${placarRodadaOponente} pontos\n\n`;
+    mensagem += `PLACAR GERAL:\n`;
+    mensagem += `Você: ${placarJogador} pontos\n`;
+    mensagem += `Máquina: ${placarOponente} pontos\n`;
+    
+    alert(mensagem);
+    atualizarPlacarGeral();
+
+    setTimeout(() => {
+        alert("Iniciando nova rodada...");
+        iniciarPartida();
+    }, 8000);
 }
 
-// =================================================================
-// INTELIGÊNCIA ARTIFICIAL DA MÁQUINA (BOT)
-// =================================================================
 function jogarTurnoDoBot() {
     if (jogadorAtual !== 1) return;
 
     setTimeout(() => {
-        // 1. COMPRAR CARTA
         if (monteCompra.length === 0) { finalizarRodada(false); return; }
         const cartaComprada = monteCompra.pop();
         jogadores[1].push(cartaComprada);
         renderizarTudo();
 
         setTimeout(() => {
-            // 2. BAIXAR JOGOS (lógica simples)
             let baixouJogo = true;
             while(baixouJogo) {
                 baixouJogo = false;
                 let melhorJogo = [];
                 let indicesNaMao = [];
                 const maoBot = jogadores[1];
+                if (maoBot.length < 3) break;
 
                 for (let i = 0; i < maoBot.length; i++) {
                     for (let j = i + 1; j < maoBot.length; j++) {
@@ -183,27 +260,25 @@ function jogarTurnoDoBot() {
             }
 
             setTimeout(() => {
-                // 3. DESCARTAR CARTA
                 if (jogadores[1].length > 0) {
-                    let indiceDescarte = 0; // Descarta a primeira carta como estratégia simples
+                    let indiceDescarte = 0;
                     const cartaDescartada = jogadores[1].splice(indiceDescarte, 1)[0];
                     lixo.push(cartaDescartada);
                     renderizarTudo();
                     animarCarta(document.getElementById('lixo'), false);
                 }
 
-                // Devolve a vez para o jogador
                 jogadorAtual = 0;
                 podeComprar = true;
                 renderizarTudo();
 
-            }, 1500); // Delay para descartar
-        }, 1500); // Delay para baixar jogos
-    }, 1000); // Delay para comprar
+            }, 1500);
+        }, 1500);
+    }, 1000);
 }
 
-// Função para criar o HTML interno de uma carta
 function criarConteudoCarta(carta) {
+    if (!carta || !carta.valor || !carta.naipe) return '';
     return `
         <div class="canto superior">
             <span class="valor">${carta.valor}</span>
@@ -217,7 +292,6 @@ function criarConteudoCarta(carta) {
     `;
 }
 
-// 4. Função de Renderização Principal
 function renderizarTudo() {
     const monteDiv = document.getElementById('monte-compra');
     const lixoDiv = document.getElementById('lixo');
@@ -225,19 +299,18 @@ function renderizarTudo() {
 
     monteDiv.classList.remove('acao-ativa');
     lixoDiv.classList.remove('acao-ativa');
-    acoesContainer.classList.remove('acao-ativa');
+    if (acoesContainer) acoesContainer.classList.remove('acao-ativa');
     
     if (podeComprar && jogadorAtual === 0) {
         monteDiv.classList.add('acao-ativa');
         lixoDiv.classList.add('acao-ativa');
     } else if (!podeComprar && jogadorAtual === 0) {
-        acoesContainer.classList.add('acao-ativa');
+        if (acoesContainer) acoesContainer.classList.add('acao-ativa');
     }
 
     const acoesVisiveis = !podeComprar && jogadorAtual === 0;
-    acoesContainer.style.display = acoesVisiveis ? 'flex' : 'none';
+    if (acoesContainer) acoesContainer.style.display = acoesVisiveis ? 'flex' : 'none';
 
-    // Renderiza mão do jogador (Jogador 0)
     const maoJogadorDiv = document.getElementById('mao-jogador');
     maoJogadorDiv.innerHTML = '';
     
@@ -260,7 +333,6 @@ function renderizarTudo() {
         maoJogadorDiv.appendChild(cartaDiv);
     });
     
-    // Renderiza mão do oponente (Jogador 1)
     const maoOponenteDiv = document.getElementById('mao-oponente');
     maoOponenteDiv.innerHTML = '';
     for(let i = 0; i < jogadores[1].length; i++) {
@@ -269,7 +341,6 @@ function renderizarTudo() {
         maoOponenteDiv.appendChild(cartaDiv);
     }
     
-    // Renderiza Lixo e Monte
     if (lixo.length > 0) {
         const topoLixo = lixo[lixo.length - 1];
         lixoDiv.innerHTML = criarConteudoCarta(topoLixo);
@@ -282,7 +353,6 @@ function renderizarTudo() {
     }
     document.getElementById('monte-compra-contador').textContent = monteCompra.length;
 
-    // Renderiza jogos baixados
     const jogosJogadorDiv = document.getElementById('jogos-jogador-container');
     const jogosOponenteDiv = document.getElementById('jogos-oponente-container');
     jogosJogadorDiv.innerHTML = '';
@@ -320,7 +390,6 @@ function renderizarTudo() {
         }
     });
 
-    // Renderiza 3s Vermelhos
     const tresVermelhosDiv = document.getElementById('tres-vermelhos');
     tresVermelhosDiv.innerHTML = '';
     tresVermelhosBaixados.forEach(item => {
@@ -352,15 +421,6 @@ function animarCartaNaMao(idCarta, permanente) {
     animarCarta(cartaDiv, permanente);
 }
 
-// O restante das funções (validarJogo, finalizarRodada, etc.) não precisam de alteração imediata
-// e podem ser usadas as versões completas anteriores.
-// As funções mais importantes (renderizarTudo, criarBaralho, iniciarPartida) foram incluídas aqui.
-
-// =================================================================
-// O CÓDIGO CONTINUA DAQUI
-// =================================================================
-
-// 5. Interatividade
 function adicionarEventListeners() {
     document.getElementById('monte-compra').onclick = comprarDoMonte;
     document.getElementById('lixo').onclick = comprarDoLixo;
@@ -368,6 +428,5 @@ function adicionarEventListeners() {
     document.getElementById('btn-descartar').onclick = descartarCartaSelecionada;
 }
 
-
-// --- Inicia o Jogo ---
-iniciarPartida();
+// iniciarPartida();
+document.addEventListener('DOMContentLoaded', iniciarPartida);

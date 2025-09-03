@@ -1,189 +1,102 @@
-/* --- CONFIGURAÇÃO GERAL DE TELA CHEIA --- */
-:root {
-    --altura-carta-mao: 20vh;
-    --largura-carta-mao: calc(var(--altura-carta-mao) * 0.7);
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html, body {
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #0f4d1d;
-    color: white;
-    overflow: hidden;
-    user-select: none;
+body {
+  font-family: Arial, sans-serif;
+  background: #2e7d32; /* verde feltro de mesa */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-#game-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 5px;
-    box-sizing: border-box;
+.game-container {
+  width: 100%;
+  max-width: 900px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
 }
 
-/* --- ÁREAS PRINCIPAIS --- */
-#area-oponente, #area-do-jogador {
-    flex-shrink: 0;
+/* Áreas */
+.opponent, .player {
+  text-align: center;
 }
 
-#area-da-mesa {
-    flex-grow: 1;
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    margin: 5px 0;
-    overflow: hidden;
+.table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
 }
 
-/* --- COMPONENTES DO JOGO --- */
-.info-jogador {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0,0,0,0.4);
-    padding: 2px 10px;
-    border-radius: 10px;
-    margin: 0 auto 5px auto;
-    width: fit-content;
-    height: 25px;
+/* Cartas */
+.hand {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.mao {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    position: relative;
+.card {
+  width: 60px;
+  height: 90px;
+  background: white;
+  color: black;
+  border: 2px solid #000;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 20px;
 }
 
-#mao-oponente {
-    height: calc(var(--altura-carta-mao) * 0.5);
+.card.back {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  border: 2px solid #fff;
+  color: transparent;
 }
 
-#mao-jogador {
-    height: var(--altura-carta-mao);
+/* Botões */
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.carta {
-    height: var(--altura-carta-mao);
-    width: var(--largura-carta-mao);
-    border: 1px solid black;
-    background-color: white;
-    color: black;
-    border-radius: 8px;
-    font-size: 2.5vh;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    box-sizing: border-box;
-    position: relative; /* Para z-index funcionar */
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #ff9800;
+  color: #fff;
+  font-weight: bold;
 }
 
-#mao-jogador .carta {
-    margin-right: calc(var(--largura-carta-mao) * -0.7); /* Sobrepõe 70% */
-}
-#mao-jogador .carta:hover {
-    transform: translateY(-25px);
-    z-index: 100;
-}
-#mao-jogador .carta.selecionada {
-    transform: translateY(-30px);
-    border: 3px solid #ffdf00;
+button:hover {
+  background: #e65100;
 }
 
-#mao-oponente .carta {
-    height: 100%;
-    width: auto;
-    aspect-ratio: 7/10; /* Mantém proporção da carta */
-    margin-right: -5vw;
+/* Responsividade */
+@media (max-width: 600px) {
+  .card {
+    width: 45px;
+    height: 70px;
+    font-size: 16px;
+  }
+  .table {
+    gap: 20px;
+  }
 }
-
-#pilar-central {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
-#pilar-central .carta {
-    height: calc(var(--altura-carta-mao) * 0.8);
-    width: calc(var(--largura-carta-mao) * 0.8);
-    font-size: 2.2vh;
-}
-
-#monte-compra-contador {
-    background-color: rgba(0,0,0,0.5);
-    padding: 2px 5px;
-    border-radius: 5px;
-    font-size: 0.8em;
-}
-
-.container-jogos-baixados {
-    flex-grow: 1;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 5px;
-    width: 38%;
-    overflow-y: auto;
-}
-.container-jogos-baixados .jogo {
-    margin-bottom: 5px;
-    display: flex;
-    flex-wrap: wrap;
-}
-.container-jogos-baixados .carta {
-    height: calc(var(--altura-carta-mao) * 0.5);
-    width: calc(var(--largura-carta-mao) * 0.5);
-    font-size: 1.5vh;
-    border-width: 1px;
-    margin-right: -15px;
-}
-
-.canastra-info { font-weight: bold; font-size: 12px; text-align: center; width: 100%;}
-.canastra-limpa { border: 2px solid #ffdf00; padding: 3px; border-radius: 8px; }
-.canastra-suja { border: 2px solid #c0c0c0; padding: 3px; border-radius: 8px; }
-
-#tres-vermelhos-container {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 5px;
-    margin-bottom: 5px;
-}
-#tres-vermelhos {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 5px;
-    min-height: calc(var(--altura-carta-mao) * 0.45);
-}
-#tres-vermelhos .carta {
-    height: calc(var(--altura-carta-mao) * 0.4);
-    width: calc(var(--largura-carta-mao) * 0.4);
-    font-size: 1.4vh;
-}
-
-.carta.verso { background-color: #55a; background-image: linear-gradient(45deg, #0003, #0000); color: transparent; }
-.carta.vermelha { color: #d10a0a; }
-
-#acoes-container {
-    padding: 5px 0;
-    height: 40px;
-}
-#btn-baixar-jogo, #btn-descartar { padding: 8px 15px; font-size: 14px; font-weight: bold; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 0 10px; }
-#btn-baixar-jogo { background-color: #4CAF50; }
-#btn-descartar { background-color: #f44336; }
-
-.acao-ativa { animation: pulsarVerde 1.5s infinite; }
-@keyframes pulsarVerde { 
-    50% { box-shadow: 0 0 25px 12px rgba(120, 255, 120, 0.8); }
-}
-#acoes-container.acao-ativa button { animation: pulsarVerde 1.5s infinite; }
-.carta-animada { animation: piscarComLuz 0.5s 3; }
-@keyframes piscarComLuz { 50% { opacity: 0.5; box-shadow: 0 0 15px 7px rgba(255, 255, 100, 0.8); } }
-.carta-comprada { border: 3px solid #64b4ff; box-shadow: 0 0 15px 7px rgba(100, 180, 255, 0.7); }
